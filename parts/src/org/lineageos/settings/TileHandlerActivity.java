@@ -37,6 +37,8 @@ import org.lineageos.settings.thermal.ThermalSettingsActivity;
 import org.lineageos.settings.thermal.ThermalTileService;
 import org.lineageos.settings.refreshrate.RefreshActivity;
 import org.lineageos.settings.refreshrate.RefreshTileService;
+import org.lineageos.settings.gameoverlay.GameOverlaySettingsActivity;
+import org.lineageos.settings.gameoverlay.GameOverlayTileService;
 
 public final class TileHandlerActivity extends Activity {
     private static final String TAG = "TileHandlerActivity";
@@ -50,6 +52,7 @@ public final class TileHandlerActivity extends Activity {
         TILE_ACTIVITY_MAP.put(TouchSamplingTileService.class.getName(), TouchSamplingSettingsActivity.class);
         TILE_ACTIVITY_MAP.put(ThermalTileService.class.getName(), ThermalSettingsActivity.class);
         TILE_ACTIVITY_MAP.put(RefreshTileService.class.getName(), RefreshActivity.class);
+        TILE_ACTIVITY_MAP.put(GameOverlayTileService.class.getName(), GameOverlaySettingsActivity.class);
     }
 
     @Override
