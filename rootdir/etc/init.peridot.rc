@@ -45,7 +45,8 @@ on property:vendor.post_boot.parsed=1
     write /dev/cpuset/background/cpus 0-1
     write /dev/cpuset/restricted/cpus 0-3
     write /dev/cpuset/foreground/cpus 0-6
-
+    # Enable PowerHAL hint processing
+    setprop vendor.powerhal.init 1
     # IRQ Tuning
     # IRQ 70: msm_drm0
     # IRQ 222: kgsl_3d0_irq
