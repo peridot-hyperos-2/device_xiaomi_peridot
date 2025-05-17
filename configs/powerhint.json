@@ -365,9 +365,9 @@
       "Duration": 0,
       "Value": "1"
     },
-    {
+	{
       "PowerHint": "INTERACTIVE",
-      "Node": "PredictionDisabled",
+      "Node": "SleepDisabled",
       "Duration": 0,
       "Value": "1"
     },
