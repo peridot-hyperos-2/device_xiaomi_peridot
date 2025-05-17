@@ -195,6 +195,9 @@ TARGET_COPY_OUT_VENDOR_DLKM := vendor_dlkm
 # Platform
 TARGET_BOARD_PLATFORM := pineapple
 
+# Power
+TARGET_PROVIDES_POWERHAL := true
+
 # Properties
 TARGET_ODM_PROP += $(DEVICE_PATH)/props/odm.prop
 TARGET_PRODUCT_PROP += $(DEVICE_PATH)/props/product.prop
