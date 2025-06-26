@@ -269,7 +269,8 @@ PRODUCT_PACKAGES += \
     android.hidl.memory.block@1.0.vendor \
     libhidlbase_shim \
     libhidltransport.vendor \
-    libhwbinder.vendor
+    libhwbinder.vendor \
+    libbinder_shim.vendor
 
 # Init
 $(call soong_config_set,libinit,vendor_init_lib,//$(LOCAL_PATH):libinit_peridot)
