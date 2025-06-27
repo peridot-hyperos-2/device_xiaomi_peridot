@@ -46,6 +46,11 @@ blob_fixups: blob_fixups_user_type = {
     'odm/lib64/libwrapper_dlengine.so': blob_fixup()
         .add_needed('libwrapper_dlengine_shim.so'),
 
+    ('odm/lib64/libaudioroute_ext.so',
+     'vendor/lib64/libar-pal.so',
+     'vendor/lib64/libagm.so'): blob_fixup()
+        .replace_needed('libaudioroute.so', 'libaudioroute-v34.so'),  
+
     'system_ext/bin/wfdservice64': blob_fixup()
         .add_needed('libwfdservice_shim.so'),
 
@@ -67,9 +72,12 @@ blob_fixups: blob_fixups_user_type = {
         .add_needed('libcodec2_hidl_shim.so')
         .add_needed('libstagefright_foundation-v33.so'),
 
-    ('vendor/bin/hw/vendor.dolby.hardware.dms@2.0-service',
-     'vendor/lib64/hw/audio.primary.pineapple.so'): blob_fixup()
+    'vendor/bin/hw/vendor.dolby.hardware.dms@2.0-service': blob_fixup()
         .add_needed('libstagefright_foundation-v33.so'),
+
+    'vendor/lib64/hw/audio.primary.pineapple.so': blob_fixup()
+        .add_needed('libstagefright_foundation-v33.so')
+        .add_needed('libaudioroute-v34.so'),
 
     ('vendor/lib64/soundfx/libdlbvol.so',
      'vendor/lib64/soundfx/libhwdap.so',
