@@ -658,7 +658,8 @@ PRODUCT_COPY_FILES += \
 # VNDK
 PRODUCT_COPY_FILES += \
     prebuilts/vndk/v33/arm64/arch-arm64-armv8-a/shared/vndk-core/libstagefright_foundation.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libstagefright_foundation-v33.so \
-    prebuilts/vndk/v34/arm64/arch-arm64-armv8-a/shared/vndk-core/libaudioroute.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libaudioroute-v34.so
+    prebuilts/vndk/v34/arm64/arch-arm64-armv8-a/shared/vndk-core/libaudioroute.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libaudioroute-v34.so \
+    prebuilts/vndk/v33/arm64/arch-arm64-armv8-a/shared/vndk-core/libui.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libui-v33.so
 
 # Weaver
 PRODUCT_PACKAGES += \
