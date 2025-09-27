@@ -40,7 +40,8 @@ object TouchFeatureController {
     private fun ensureService(): ITouchFeature? {
         if (service != null) return service
         return try {
-            val binder: IBinder? = ServiceManager.waitForDeclaredService(SERVICE_NAME)
+            // Optimized: Use getService instead of waitForDeclaredService to prevent blocking
+            val binder: IBinder? = ServiceManager.getService(SERVICE_NAME)
             if (binder == null) {
                 Log.w(TAG, "TouchFeature service not found: $SERVICE_NAME")
                 null
