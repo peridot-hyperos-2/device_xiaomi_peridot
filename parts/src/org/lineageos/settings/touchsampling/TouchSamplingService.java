@@ -35,6 +35,7 @@ import android.app.PendingIntent;
 
 import org.lineageos.settings.R;
 import org.lineageos.settings.utils.FileUtils;
+import org.lineageos.settings.touchsampling.TouchFeatureController;
 
 public class TouchSamplingService extends Service {
     private static final String TAG = "TouchSamplingService";
@@ -186,11 +187,9 @@ public class TouchSamplingService extends Service {
      * @param state 1 to enable high touch sampling rate, 0 to disable it.
      */
     private void applyTouchSamplingRate(int state) {
-        String currentState = FileUtils.readOneLine(TouchSamplingUtils.HTSR_FILE);
-        if (currentState == null || !currentState.equals(Integer.toString(state))) {
-            Log.d(TAG, "Applying touch sampling rate: " + state);
-            FileUtils.writeLine(TouchSamplingUtils.HTSR_FILE, Integer.toString(state));
-        }
+        boolean enable = state == 1;
+        Log.d(TAG, "Applying touch sampling via controller: " + enable);
+        TouchFeatureController.INSTANCE.setHighTouchSamplingEnabled(enable);
     }
 
     /**
