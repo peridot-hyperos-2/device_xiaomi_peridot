@@ -6,5 +6,5 @@
     package="android.overlay.peridot">
     <overlay android:targetPackage="android"
                    android:isStatic="true"
-                   android:priority="100"/>
+                   android:priority="800"/>
 </manifest>
