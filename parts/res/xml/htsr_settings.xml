@@ -32,6 +32,13 @@
 
         <SwitchPreferenceCompat
             android:defaultValue="true"
+            android:key="htsr_auto_screen_control"
+            android:title="Automatic Screen-Based Control"
+            android:summary="Automatically enable high touch sampling when screen turns on and disable when screen turns off to save power"
+            android:showDefault="false" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
             android:key="htsr_auto_enable_selected_apps"
             android:title="Auto-enable High Touch Polling for Selected Apps"
             android:summary="If turned on, selected apps will auto-enable High touch polling even if the main switch is off"

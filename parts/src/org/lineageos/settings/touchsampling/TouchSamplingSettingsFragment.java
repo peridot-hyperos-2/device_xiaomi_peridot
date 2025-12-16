@@ -64,6 +64,12 @@ public class TouchSamplingSettingsFragment extends PreferenceFragment implements
         mHTSRPreference.setChecked(htsrEnabled);
         mHTSRPreference.setOnPreferenceChangeListener(this);
 
+        // Setup the automatic screen control toggle
+        SwitchPreferenceCompat autoScreenControlPref = (SwitchPreferenceCompat) findPreference("htsr_auto_screen_control");
+        boolean autoScreenControl = mPrefs.getBoolean("htsr_auto_screen_control", true);
+        autoScreenControlPref.setChecked(autoScreenControl);
+        autoScreenControlPref.setOnPreferenceChangeListener(this);
+
         // Setup the new auto-enable for selected apps toggle
         SwitchPreferenceCompat autoEnableSelectedAppsPref = (SwitchPreferenceCompat) findPreference("htsr_auto_enable_selected_apps");
         boolean autoEnableSelectedApps = mPrefs.getBoolean("htsr_auto_enable_selected_apps", true);
@@ -94,20 +100,81 @@ public class TouchSamplingSettingsFragment extends PreferenceFragment implements
         if (videoPreference != null) {
             videoPreference.restartVideo();
         }
+        
+        // Synchronize UI state with service state
+        synchronizeMainSwitchState();
+    }
+    
+    /**
+     * Ensures the main switch UI reflects the actual service state
+     */
+    private void synchronizeMainSwitchState() {
+        try {
+            boolean currentMainState = mPrefs.getBoolean(HTSR_STATE, false);
+            boolean currentAutoScreenControl = mPrefs.getBoolean("htsr_auto_screen_control", true);
+            boolean currentAutoApp = mPrefs.getBoolean("htsr_auto_enable_selected_apps", true);
+            
+            // Update UI to reflect current state
+            if (mHTSRPreference != null) {
+                mHTSRPreference.setChecked(currentMainState);
+            }
+            
+            SwitchPreferenceCompat autoScreenControlPref = (SwitchPreferenceCompat) findPreference("htsr_auto_screen_control");
+            if (autoScreenControlPref != null) {
+                autoScreenControlPref.setChecked(currentAutoScreenControl);
+            }
+            
+            SwitchPreferenceCompat autoAppPref = (SwitchPreferenceCompat) findPreference("htsr_auto_enable_selected_apps");
+            if (autoAppPref != null) {
+                autoAppPref.setChecked(currentAutoApp);
+            }
+            
+            // Ensure service is running if any feature is enabled
+            boolean shouldRunService = currentMainState || currentAutoScreenControl || currentAutoApp;
+            if (shouldRunService) {
+                ensureServiceRunning();
+            }
+            
+        } catch (Exception e) {
+            android.util.Log.e("TouchSamplingSettings", "Error synchronizing main switch state", e);
+        }
     }
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         if (HTSR_ENABLE_KEY.equals(preference.getKey())) {
             boolean isEnabled = (Boolean) newValue;
+            // Save the main switch state immediately
             mPrefs.edit().putBoolean(HTSR_STATE, isEnabled).apply();
-            startTouchSamplingService(isEnabled);
+            
+            // Always ensure service is running for proper state management
+            // The service will handle the actual hardware control based on effective state
+            startTouchSamplingServiceOptimized(isEnabled);
+            
+            // Immediately apply the change if screen is on
+            if (isEnabled) {
+                // Force immediate activation if user manually enables
+                notifyServiceOfImmediateChange("MANUAL_ENABLE");
+            } else {
+                // Force immediate deactivation if user manually disables
+                notifyServiceOfImmediateChange("MANUAL_DISABLE");
+            }
+            
+        } else if ("htsr_auto_screen_control".equals(preference.getKey())) {
+            boolean isAutoScreenControl = (Boolean) newValue;
+            mPrefs.edit().putBoolean("htsr_auto_screen_control", isAutoScreenControl).apply();
+            
+            // Ensure service is running to handle screen control
+            ensureServiceRunning();
+            notifyServiceOfImmediateChange("AUTO_SCREEN_CONTROL_CHANGED");
+            
         } else if ("htsr_auto_enable_selected_apps".equals(preference.getKey())) {
             boolean isAutoEnableSelectedApps = (Boolean) newValue;
             mPrefs.edit().putBoolean("htsr_auto_enable_selected_apps", isAutoEnableSelectedApps).apply();
-            // Reapply the service state
-            boolean mainEnabled = mPrefs.getBoolean(HTSR_STATE, false);
-            startTouchSamplingService(mainEnabled || isAutoEnableSelectedApps);
+            
+            // Ensure service is running to handle auto-app functionality
+            ensureServiceRunning();
+            notifyServiceOfImmediateChange("AUTO_APP_CHANGED");
         }
         return true;
     }
@@ -118,6 +185,51 @@ public class TouchSamplingSettingsFragment extends PreferenceFragment implements
             getActivity().startService(serviceIntent);
         } else {
             getActivity().stopService(serviceIntent);
+        }
+    }
+    
+    /**
+     * Optimized service management that considers all features
+     */
+    private void startTouchSamplingServiceOptimized(boolean mainSwitchEnabled) {
+        Intent serviceIntent = new Intent(getActivity(), TouchSamplingService.class);
+        
+        // Determine if service should be running based on any active feature
+        boolean mainEnabled = mainSwitchEnabled;
+        boolean autoScreenControl = mPrefs.getBoolean("htsr_auto_screen_control", true);
+        boolean autoEnableSelectedApps = mPrefs.getBoolean("htsr_auto_enable_selected_apps", true);
+        
+        // Service should run if ANY feature is enabled
+        boolean shouldRunService = mainEnabled || autoScreenControl || autoEnableSelectedApps;
+        
+        if (shouldRunService) {
+            // Always start service if any feature is active
+            getActivity().startService(serviceIntent);
+        } else {
+            // Only stop service if ALL features are disabled
+            getActivity().stopService(serviceIntent);
+        }
+    }
+    
+    /**
+     * Ensures service is running for background features
+     */
+    private void ensureServiceRunning() {
+        Intent serviceIntent = new Intent(getActivity(), TouchSamplingService.class);
+        getActivity().startService(serviceIntent);
+    }
+    
+    /**
+     * Notifies the service of immediate preference changes for instant response
+     */
+    private void notifyServiceOfImmediateChange(String changeType) {
+        try {
+            Intent serviceIntent = new Intent(getActivity(), TouchSamplingService.class);
+            serviceIntent.putExtra("immediate_change", changeType);
+            serviceIntent.putExtra("timestamp", System.currentTimeMillis());
+            getActivity().startService(serviceIntent);
+        } catch (Exception e) {
+            android.util.Log.e("TouchSamplingSettings", "Error notifying service of change: " + changeType, e);
         }
     }
 

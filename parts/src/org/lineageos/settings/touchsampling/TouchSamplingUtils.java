@@ -30,12 +30,8 @@ import org.lineageos.settings.touchsampling.TouchSamplingSettingsFragment;
 import org.lineageos.settings.utils.FileUtils;
 
 import java.util.List;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.FileReader;
+
+import org.lineageos.settings.touchsampling.TouchFeatureController;
 
 public final class TouchSamplingUtils {
     private static final String TAG = "TouchSamplingUtils";
@@ -45,21 +41,8 @@ public final class TouchSamplingUtils {
     public static void restoreSamplingValue(Context context) {
         SharedPreferences sharedPref = context.getSharedPreferences(
                 TouchSamplingSettingsFragment.SHAREDHTSR, Context.MODE_PRIVATE);
-        int htsrState = sharedPref.getInt(TouchSamplingSettingsFragment.SHAREDHTSR, 0);
-        FileUtils.writeLine(HTSR_FILE, Integer.toString(htsrState));
-    }
-
-    /**
-     * Returns the package name of the current foreground app.
-     */
-    private static String getForegroundApp(Context context) {
-        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        if (am != null) {
-            List<ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(1);
-            if (tasks != null && !tasks.isEmpty() && tasks.get(0).topActivity != null) {
-                return tasks.get(0).topActivity.getPackageName();
-            }
-        }
-        return null;
+        boolean enabled = sharedPref.getBoolean(TouchSamplingSettingsFragment.HTSR_STATE, false);
+        // Delegate to controller which will use AIDL if available and fall back to sysfs
+        TouchFeatureController.INSTANCE.setHighTouchSamplingEnabled(enabled);
     }
 }
